@@ -109,7 +109,7 @@ async function run() {
 
     // * Get APIs
     // * Get All Users [ADMIN ONLY]
-    app.get("/api/admin/users", verifyToken, verifyAdmin, async (req, res) => {
+    app.get("/api/users", verifyToken, verifyAdmin, async (req, res) => {
       try {
         const page = parseInt(req?.query?.page);
         const size = parseInt(req.query.size);
@@ -167,7 +167,13 @@ async function run() {
             insertedId: null,
           });
         }
-        const result = await userCollection.insertOne(user);
+        const result = await userCollection.insertOne({
+          email: user.email,
+          name: user.name,
+          photo: user.photo,
+          role: "user",
+          createdAt: new Date(),
+        });
         res.send(result);
       } catch (error) {
         res.send(error);
