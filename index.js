@@ -40,7 +40,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // * Collections
-    const userCollection = client.db("admitmes").collection("users");
+    const userCollection = client.db("admitme").collection("users");
     const universityCollection = client
       .db("admitme")
       .collection("universities");
@@ -109,17 +109,18 @@ async function run() {
 
     // * Get APIs
     // * Get All Users [ADMIN ONLY]
-    app.get("/api/users", verifyToken, verifyAdmin, async (req, res) => {
+    app.get("/api/admin/users", verifyToken, verifyAdmin, async (req, res) => {
       try {
-        const page = parseInt(req?.query?.page);
-        const size = parseInt(req.query.size);
-
-        const result = await userCollection
+        const page = parseInt(req?.query?.page || 0);
+        const size = parseInt(req.query.size || 5);
+        const userCount = await userCollection.countDocuments({});
+        const users = await userCollection
           .find()
           .skip(page * size)
           .limit(size)
           .toArray();
-        res.send({ users: result, userCount });
+        res.send({ users, userCount });
+        console.log(userCount, users);
       } catch (err) {
         res.send(err);
       }
@@ -170,7 +171,6 @@ async function run() {
         const result = await userCollection.insertOne({
           email: user.email,
           name: user.name,
-          photo: user.photo,
           role: "user",
           createdAt: new Date(),
         });
