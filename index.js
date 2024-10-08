@@ -153,6 +153,27 @@ async function run() {
       }
     });
 
+    // * Post APIs
+    // Post User [AFTER LOGGEDIN/PUBLIC]
+    app.post("/api/users", async (req, res) => {
+      try {
+        const user = req.body;
+        // Check if user is exits
+        const query = { email: user.email };
+        const existingUser = await userCollection.findOne(query);
+        if (existingUser) {
+          return res.send({
+            message: "User already exists!",
+            insertedId: null,
+          });
+        }
+        const result = await userCollection.insertOne(user);
+        res.send(result);
+      } catch (error) {
+        res.send(error);
+      }
+    });
+
     // await client.db("admin").command({ ping: 1 });
     // console.log("You successfully connected to MongoDB!");
   } finally {
